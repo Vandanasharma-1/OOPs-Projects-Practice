@@ -40,11 +40,11 @@ class BankAccount:
         return self.__balance
     
     def _add_transaction(self, ttype: str, amount: float, note: str = ""):
-        self._add_transaction.append({
+        self._transactions.append({
             "type": ttype,
             "amount": float(amount),
             "note" : note,
-            "time" : datetime.datatime.now()
+            "time" : datetime.datetime.now()
         })
 
     def deposit(self, amount: float, note: str = "") -> float:
@@ -81,3 +81,21 @@ class BankAccount:
         """Private helper to receive transferred funds."""
         self.__balance += amount
         self._add_transaction("transfer_in", amount, f"from {source_account.acc_no}. {note}")
+    
+    def get_transaction_history(self, limit: int = None) -> List[Dict]:
+        """Return transaction history (most recent last). Optionally limit number of records."""
+        if limit is None:
+            return list(self._transactions)
+        return list(self._transactions[-limit:])
+    
+    def apply_interest(self, annual_rate_percent: float):
+        """Apply simple annual interest (pro-rated for 1 call). For demo only."""
+        if annual_rate_percent < 0:
+            raise InvalidAmountError("Interest rate cannot be negative.")
+        interest = self.__balance * (annual_rate_percent / 100.0)
+        self.__balance +=interest
+        self._add_transaction("interest", interest, f"applied {annual_rate_percent}%")
+        return interest
+    
+    def __str__(self):
+        return f"BankAccount(acc_no={self.acc_no}, owner = {self.owner}, balance = {self.balance:.2f})"
